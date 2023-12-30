@@ -1,0 +1,127 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent a task
+struct Task {
+    char description[100];
+    struct Task* next;
+};
+
+// Function declarations
+struct Task* addTask(struct Task* head, const char* description);
+struct Task* deleteTask(struct Task* head, const char* description);
+void displayTasks(struct Task* head);
+void clearTasks(struct Task* head);
+
+int main() {
+    struct Task* taskList = NULL;
+    int choice;
+    char description[100];
+
+    do {
+        // Display menu
+        printf("\nTo-Do List Menu:\n");
+        printf("1. Add Task\n");
+        printf("2. Delete Task\n");
+        printf("3. View Tasks\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter task description: ");
+                scanf("%s", description);
+                taskList = addTask(taskList, description);
+                break;
+            case 2:
+                printf("Enter task description to delete: ");
+                scanf("%s", description);
+                taskList = deleteTask(taskList, description);
+                break;
+            case 3:
+                displayTasks(taskList);
+                break;
+            case 0:
+                clearTasks(taskList);
+                printf("To-Do List application closed.\n");
+                break;
+            default:
+                printf("Invalid choice. Please enter a number between 0 and 3.\n");
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
+
+// Function to add a task to the to-do list
+struct Task* addTask(struct Task* head, const char* description) {
+    struct Task* newTask = (struct Task*)malloc(sizeof(struct Task));
+    if (newTask == NULL) {
+        printf("Memory allocation failed.\n");
+        return head;
+    }
+
+    // Copy the description to the new task
+    snprintf(newTask->description, sizeof(newTask->description), "%s", description);
+
+    // Insert at the beginning of the list
+    newTask->next = head;
+    return newTask;
+}
+
+// Function to delete a task from the to-do list
+struct Task* deleteTask(struct Task* head, const char* description) {
+    struct Task* current = head;
+    struct Task* prev = NULL;
+
+    while (current != NULL) {
+        if (strcmp(current->description, description) == 0) {
+            // Found the task to delete
+            if (prev == NULL) {
+                // Delete the first task
+                struct Task* temp = current;
+                head = current->next;
+                free(temp);
+            } else {
+                // Delete a task from the middle or end
+                struct Task* temp = current;
+                prev->next = current->next;
+                free(temp);
+            }
+
+            printf("Task \"%s\" deleted.\n", description);
+            return head;
+        }
+
+        prev = current;
+        current = current->next;
+    }
+
+    printf("Task \"%s\" not found.\n", description);
+    return head;
+}
+
+// Function to display all tasks in the to-do list
+void displayTasks(struct Task* head) {
+    if (head == NULL) {
+        printf("To-Do List is empty.\n");
+    } else {
+        printf("To-Do List:\n");
+        while (head != NULL) {
+            printf("- %s\n", head->description);
+            head = head->next;
+        }
+    }
+}
+
+// Function to clear all tasks and free memory
+void clearTasks(struct Task* head) {
+    struct Task* current = head;
+    while (current != NULL) {
+        struct Task* temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
